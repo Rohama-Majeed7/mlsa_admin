@@ -17,7 +17,6 @@ app.use(
       process.env.FRONTEND_URL_mlsa_admin || "https://localhost:3000",
       process.env.FRONTEND_URL_mlsa_site || "https://localhost:5173",
     ],
-
   }),
 );
 app.use(express.json());
@@ -49,9 +48,12 @@ mongoose
   .then(async () => {
     console.log("Connected to MongoDB");
     await seedAdmin();
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    }
   })
   .catch((err) => {
     console.error("MongoDB connection error:", err.message);
     process.exit(1);
   });
+module.exports = app;
