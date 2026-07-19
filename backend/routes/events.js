@@ -24,22 +24,22 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/',async (req, res) => {
   try {
-    const { title, description, url } = req.body;
+    const { title, description, url ,image} = req.body;
     if (!title || !description) {
       return res.status(400).json({ message: 'Title and description are required.' });
     }
-    if (!req.file) {
+    if (!image) {
       return res.status(400).json({ message: 'Event image is required.' });
     }
 
-    const baseURL = `${req.protocol}://${req.get('host')}`;
+    
     const event = await Event.create({
       title,
       description,
       url: url || '',
-      image: `${baseURL}/uploads/${req.file.filename}`,
+      image,
     });
 
     res.status(201).json(event);
@@ -50,12 +50,8 @@ router.post('/', upload.single('image'), async (req, res) => {
 
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const { title, description, url } = req.body;
-    const update = { title, description, url: url || '' };
-    if (req.file) {
-      const baseURL = `${req.protocol}://${req.get('host')}`;
-      update.image = `${baseURL}/uploads/${req.file.filename}`;
-    }
+    const { title, description, url ,image} = req.body;
+    const update = { title, description, url: url || '' ,image};
 
     const event = await Event.findByIdAndUpdate(req.params.id, update, {
       new: true,

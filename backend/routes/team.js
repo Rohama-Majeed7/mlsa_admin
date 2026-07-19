@@ -24,20 +24,20 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', auth, upload.single('image'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { name, designation } = req.body;
+    const { name, designation ,image} = req.body;
     if (!name || !designation) {
       return res.status(400).json({ message: 'Name and designation are required.' });
     }
-    if (!req.file) {
+    if (!image) {
       return res.status(400).json({ message: 'Member image is required.' });
     }
 
     const member = await TeamMember.create({
       name,
       designation,
-      image: `/uploads/${req.file.filename}`,
+      image,
     });
 
     res.status(201).json(member);
@@ -46,11 +46,10 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
   }
 });
 
-router.put('/:id', auth, upload.single('image'), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
-    const { name, designation } = req.body;
-    const update = { name, designation };
-    if (req.file) update.image = `/uploads/${req.file.filename}`;
+    const { name, designation ,image} = req.body;
+    const update = { name, designation ,image};
 
     const member = await TeamMember.findByIdAndUpdate(req.params.id, update, {
       new: true,

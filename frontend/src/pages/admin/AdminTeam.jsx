@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { teamAPI } from '../../api';
 import Modal from '../../components/Modal';
 import './AdminPages.css';
-
+import uploadImage from '../../helpers/uploadImage';
 const emptyForm = { name: '', designation: '', image: null };
 
 export default function AdminTeam() {
@@ -49,12 +49,14 @@ export default function AdminTeam() {
     setError('');
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async(e) => {
     const file = e.target.files[0];
     if (file) {
-      setForm({ ...form, image: file });
       setPreview(URL.createObjectURL(file));
     }
+    const image = await uploadImage(file);
+    console.log('Uploaded image URL:', image); // Debugging line
+    setForm({ ...form, image: image });
   };
 
   const handleSubmit = async (e) => {

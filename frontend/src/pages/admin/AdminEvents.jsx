@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { eventsAPI } from '../../api';
 import Modal from '../../components/Modal';
 import './AdminPages.css';
-
+import uploadImage from '../../helpers/uploadImage';
 const emptyForm = { title: '', description: '', url: '', image: null };
 
 export default function AdminEvents() {
@@ -49,12 +49,13 @@ export default function AdminEvents() {
     setError('');
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async(e) => {
     const file = e.target.files[0];
     if (file) {
-      setForm({ ...form, image: file });
       setPreview(URL.createObjectURL(file));
     }
+    const image = await uploadImage(file);
+    setForm({ ...form, image: image });
   };
 
   const handleSubmit = async (e) => {
