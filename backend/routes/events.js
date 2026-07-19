@@ -1,7 +1,6 @@
 const express = require('express');
 const Event = require('../models/Event');
 // const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -48,10 +47,13 @@ router.post('/',async (req, res) => {
   }
 });
 
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
-    const { title, description, url ,image} = req.body;
-    const update = { title, description, url: url || '' ,image};
+    const { title, description, url, image } = req.body;
+    const update = { title, description, url: url || '' };
+    if (image) {
+      update.image = image;
+    }
 
     const event = await Event.findByIdAndUpdate(req.params.id, update, {
       new: true,

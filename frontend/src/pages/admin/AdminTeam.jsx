@@ -14,6 +14,7 @@ export default function AdminTeam() {
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const fetchMembers = () => {
     teamAPI
@@ -30,6 +31,7 @@ export default function AdminTeam() {
     setForm(emptyForm);
     setPreview(null);
     setError('');
+    setUploadingImage(false);
     setModalOpen(true);
   };
 
@@ -38,6 +40,7 @@ export default function AdminTeam() {
     setForm({ name: member.name, designation: member.designation, image: null });
     setPreview(member.image);
     setError('');
+    setUploadingImage(false);
     setModalOpen(true);
   };
 
@@ -47,38 +50,59 @@ export default function AdminTeam() {
     setForm(emptyForm);
     setPreview(null);
     setError('');
+    setUploadingImage(false);
   };
 
-  const handleImageChange = async(e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setPreview(URL.createObjectURL(file));
+      setUploadingImage(true);
+      setError('');
+      try {
+        const image = await uploadImage(file);
+        if (image) {
+          console.log('Uploaded image URL:', image);
+          setForm({ ...form, image: image });
+        } else {
+          setError('Failed to upload image to Cloudinary.');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Error uploading image.');
+      } finally {
+        setUploadingImage(false);
+      }
     }
-    const image = await uploadImage(file);
-    console.log('Uploaded image URL:', image); // Debugging line
-    setForm({ ...form, image: image });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (uploadingImage) {
+      setError('Please wait for the image to finish uploading.');
+      return;
+    }
     setError('');
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('designation', form.designation);
-    if (form.image) formData.append('image', form.image);
+    const payload = {
+      name: form.name,
+      designation: form.designation,
+    };
+    if (form.image) {
+      payload.image = form.image;
+    }
 
     try {
       if (editing) {
-        await teamAPI.update(editing._id, formData);
+        await teamAPI.update(editing._id, payload);
       } else {
-        if (!form.image) {
+        if (!payload.image) {
           setError('Please select a member photo.');
           setSubmitting(false);
           return;
         }
-        await teamAPI.create(formData);
+        await teamAPI.create(payload);
       }
       fetchMembers();
       closeModal();
@@ -178,6 +202,7 @@ export default function AdminTeam() {
               <div className="form-group">
                 <label htmlFor="image">Photo {!editing && '(required)'}</label>
                 <input id="image" type="file" accept="image/*" onChange={handleImageChange} />
+                {uploadingImage && <p className="uploading-text" style={{ color: '#0078d4', fontSize: '14px', margin: '5px 0' }}>Uploading image to Cloudinary...</p>}
                 {preview && <img src={preview} alt="Preview" className="image-preview round" />}
               </div>
               {error && <p className="form-error">{error}</p>}
@@ -186,8 +211,8 @@ export default function AdminTeam() {
               <button type="button" onClick={closeModal} className="btn btn-secondary">
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Saving...' : editing ? 'Update' : 'Create'}
+              <button type="submit" className="btn btn-primary" disabled={submitting || uploadingImage}>
+                {submitting ? 'Saving...' : uploadingImage ? 'Uploading...' : editing ? 'Update' : 'Create'}
               </button>
             </div>
           </form>

@@ -14,6 +14,7 @@ export default function AdminEvents() {
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const fetchEvents = () => {
     eventsAPI
@@ -30,6 +31,7 @@ export default function AdminEvents() {
     setForm(emptyForm);
     setPreview(null);
     setError('');
+    setUploadingImage(false);
     setModalOpen(true);
   };
 
@@ -38,6 +40,7 @@ export default function AdminEvents() {
     setForm({ title: event.title, description: event.description, url: event.url || '', image: null });
     setPreview(event.image);
     setError('');
+    setUploadingImage(false);
     setModalOpen(true);
   };
 
@@ -47,38 +50,59 @@ export default function AdminEvents() {
     setForm(emptyForm);
     setPreview(null);
     setError('');
+    setUploadingImage(false);
   };
 
-  const handleImageChange = async(e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setPreview(URL.createObjectURL(file));
+      setUploadingImage(true);
+      setError('');
+      try {
+        const image = await uploadImage(file);
+        if (image) {
+          setForm({ ...form, image: image });
+        } else {
+          setError('Failed to upload image to Cloudinary.');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('Error uploading image.');
+      } finally {
+        setUploadingImage(false);
+      }
     }
-    const image = await uploadImage(file);
-    setForm({ ...form, image: image });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (uploadingImage) {
+      setError('Please wait for the image to finish uploading.');
+      return;
+    }
     setError('');
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append('title', form.title);
-    formData.append('description', form.description);
-    formData.append('url', form.url);
-    if (form.image) formData.append('image', form.image);
+    const payload = {
+      title: form.title,
+      description: form.description,
+      url: form.url,
+    };
+    if (form.image) {
+      payload.image = form.image;
+    }
 
     try {
       if (editing) {
-        await eventsAPI.update(editing._id, formData);
+        await eventsAPI.update(editing._id, payload);
       } else {
-        if (!form.image) {
+        if (!payload.image) {
           setError('Please select an event image.');
           setSubmitting(false);
           return;
         }
-        await eventsAPI.create(formData);
+        await eventsAPI.create(payload);
       }
       fetchEvents();
       closeModal();
@@ -197,6 +221,7 @@ export default function AdminEvents() {
               <div className="form-group">
                 <label htmlFor="image">Image {!editing && '(required)'}</label>
                 <input id="image" type="file" accept="image/*" onChange={handleImageChange} />
+                {uploadingImage && <p className="uploading-text" style={{ color: '#0078d4', fontSize: '14px', margin: '5px 0' }}>Uploading image to Cloudinary...</p>}
                 {preview && <img src={preview} alt="Preview" className="image-preview" />}
               </div>
               {error && <p className="form-error">{error}</p>}
@@ -205,8 +230,8 @@ export default function AdminEvents() {
               <button type="button" onClick={closeModal} className="btn btn-secondary">
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Saving...' : editing ? 'Update' : 'Create'}
+              <button type="submit" className="btn btn-primary" disabled={submitting || uploadingImage}>
+                {submitting ? 'Saving...' : uploadingImage ? 'Uploading...' : editing ? 'Update' : 'Create'}
               </button>
             </div>
           </form>

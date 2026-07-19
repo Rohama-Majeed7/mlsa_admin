@@ -1,7 +1,6 @@
 const express = require('express');
 const TeamMember = require('../models/TeamMember');
 const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
 
 const router = express.Router();
 
@@ -48,8 +47,11 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const { name, designation ,image} = req.body;
-    const update = { name, designation ,image};
+    const { name, designation, image } = req.body;
+    const update = { name, designation };
+    if (image) {
+      update.image = image;
+    }
 
     const member = await TeamMember.findByIdAndUpdate(req.params.id, update, {
       new: true,
