@@ -19,7 +19,12 @@ export default function AdminTeam() {
   const fetchMembers = () => {
     teamAPI
       .getAll()
-      .then((res) => setMembers(res.data))
+      .then((res) => {
+        const sorted = [...res.data].sort(
+          (a, b) => (new Date(b.createdAt || 0) - new Date(a.createdAt || 0)) || b._id.localeCompare(a._id)
+        );
+        setMembers(sorted);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   };

@@ -19,7 +19,12 @@ export default function AdminEvents() {
   const fetchEvents = () => {
     eventsAPI
       .getAll()
-      .then((res) => setEvents(res.data))
+      .then((res) => {
+        const sorted = [...res.data].sort(
+          (a, b) => (new Date(b.createdAt || 0) - new Date(a.createdAt || 0)) || b._id.localeCompare(a._id)
+        );
+        setEvents(sorted);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   };

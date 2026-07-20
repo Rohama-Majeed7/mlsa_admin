@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/', async (_req, res) => {
   try {
-    const members = await TeamMember.find().sort({ createdAt: -1 });
+    const members = await TeamMember.find().sort({ createdAt: -1, _id: -1 });
     res.json(members);
   } catch (err) {
     res.status(500).json({ message: 'Server error.', error: err.message });
