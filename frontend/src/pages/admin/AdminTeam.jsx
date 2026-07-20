@@ -143,36 +143,38 @@ export default function AdminTeam() {
           <p>Click "Add Member" to add your first ambassador.</p>
         </div>
       ) : (
-        <div className="admin-table-wrap card">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Photo</th>
-                <th>Name</th>
-                <th>Designation</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                <tr key={member._id}>
-                  <td>
-                    <img src={member.image} alt={member.name} className="table-thumb round" />
-                  </td>
-                  <td className="table-title">{member.name}</td>
-                  <td>{member.designation}</td>
-                  <td className="table-actions">
-                    <button onClick={() => openEdit(member)} className="btn btn-secondary btn-sm">
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(member._id)} className="btn btn-danger btn-sm">
-                      Delete
-                    </button>
-                  </td>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Photo</th>
+                  <th>Name</th>
+                  <th>Designation</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {members.map((member) => (
+                  <tr key={member._id}>
+                    <td>
+                      <img src={member.image} alt={member.name} className="table-thumb round" />
+                    </td>
+                    <td className="table-title">{member.name}</td>
+                    <td>{member.designation}</td>
+                    <td className="table-actions">
+                      <button onClick={() => openEdit(member)} className="btn btn-secondary btn-sm">
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(member._id)} className="btn btn-danger btn-sm">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

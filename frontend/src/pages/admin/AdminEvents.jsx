@@ -143,46 +143,48 @@ export default function AdminEvents() {
           <p>Click "Add Event" to create your first event.</p>
         </div>
       ) : (
-        <div className="admin-table-wrap card">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>URL</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((event) => (
-                <tr key={event._id}>
-                  <td>
-                    <img src={event.image} alt={event.title} className="table-thumb" />
-                  </td>
-                  <td className="table-title">{event.title}</td>
-                  <td className="table-desc">{event.description}</td>
-                  <td>
-                    {event.url ? (
-                      <a href={event.url} target="_blank" rel="noopener noreferrer">
-                        Link
-                      </a>
-                    ) : (
-                      '—'
-                    )}
-                  </td>
-                  <td className="table-actions">
-                    <button onClick={() => openEdit(event)} className="btn btn-secondary btn-sm">
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(event._id)} className="btn btn-danger btn-sm">
-                      Delete
-                    </button>
-                  </td>
+        <div className="card admin-table-card">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>URL</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {events.map((event) => (
+                  <tr key={event._id}>
+                    <td>
+                      <img src={event.image} alt={event.title} className="table-thumb" />
+                    </td>
+                    <td className="table-title">{event.title?.length > 10 ? event.title.slice(0, 10) + '...' : event.title}</td>
+                    <td className="table-desc">{event.description}</td>
+                    <td>
+                      {event.url ? (
+                        <a href={event.url} target="_blank" rel="noopener noreferrer">
+                          Link
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className="table-actions">
+                      <button onClick={() => openEdit(event)} className="btn btn-secondary btn-sm">
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(event._id)} className="btn btn-danger btn-sm">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
